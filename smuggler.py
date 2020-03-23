@@ -1,10 +1,3 @@
-# https://stackoverflow.com/questions/20658572/python-requests-print-entire-http-request-raw
-'''
-
-curl -L -X POST -H "Content-Length: 5" -H "Transfer-Encoding: chunked" --data "0\r\n\r\n" http://v.lactea.kr
-
-'''
-
 import requests
 import argparse
 from fake_useragent import UserAgent
