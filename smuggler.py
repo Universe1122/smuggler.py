@@ -233,20 +233,6 @@ class checkServer:
         print(header + data, end="")
         print(f"======================{bcolors.ENDC}\n\n")
 
-def banner():
-	print("""
-                                         _                             
-         ___ _ __ ___  _   _  __ _  __ _| | ___ _ __       _ __  _   _ 
-        / __| '_ ` _ \| | | |/ _` |/ _` | |/ _ \ '__|     | '_ \| | | |
-        \__ \ | | | | | |_| | (_| | (_| | |  __/ |     _  | |_) | |_| |
-        |___/_| |_| |_|\__,_|\__, |\__, |_|\___|_|    (_) | .__/ \__, |
-                             |___/ |___/                  |_|    |___/ 
-                        by universe 
-""")
-	pass
-
-
-
 # Reference
 # https://stackoverflow.com/questions/28670835/python-socket-client-post-parameters
 # https://stackoverflow.com/questions/32062925/python-socket-server-handle-https-request
@@ -256,7 +242,8 @@ def sendPayload(url, header, data):
     
     if parse.scheme == "https":
         port = 443
-        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+        context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        context.verify_mode = ssl.CERT_NONE
         s = context.wrap_socket(s, server_hostname=parse.netloc)
     else:
         port = 80
@@ -268,7 +255,7 @@ def sendPayload(url, header, data):
     if sys._getframe(1).f_code.co_name.find("TETE") != -1:
         return
     
-    response = s.recv(50).decode('utf-8')
+    response = s.recv(1000).decode('utf-8')
     status_code = response[:response.index("\r\n")]
     print("     └───> "+status_code)
     
@@ -279,6 +266,19 @@ def generateUserAgent():
     useragent = UserAgent().chrome
     print("[*] Done.")
     return useragent
+
+
+def banner():
+	print("""
+                                         _                             
+         ___ _ __ ___  _   _  __ _  __ _| | ___ _ __       _ __  _   _ 
+        / __| '_ ` _ \| | | |/ _` |/ _` | |/ _ \ '__|     | '_ \| | | |
+        \__ \ | | | | | |_| | (_| | (_| | |  __/ |     _  | |_) | |_| |
+        |___/_| |_| |_|\__,_|\__, |\__, |_|\___|_|    (_) | .__/ \__, |
+                             |___/ |___/                  |_|    |___/ 
+                        by universe 
+""")
+	pass
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "HTTP request Smuggler tools")
