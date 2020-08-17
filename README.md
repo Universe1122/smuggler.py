@@ -73,9 +73,9 @@ Fixed an error when user don't input url including http:// or https://.
 
 Fixed an bug not including fake user agent.
 
-Added function that subdomain is scanned. [(Issue 1)](https://github.com/Lactea98/smuggler.py/issues/1)
+Added function that subdomain is scanned.
 
-Added option for importing list.
+Added option for importing list. [(Issue 1)](https://github.com/Lactea98/smuggler.py/issues/1)
 
 ### # Reference 
 https://portswigger.net/web-security/request-smuggling
