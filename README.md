@@ -11,10 +11,10 @@ But.. It is not finished yet, and is developing.
 ### # How to use
 
 ```
-  -h, --help         show this help message and exit
-  --url URL          Input url. --url http://test.com
-  --agent            Generating random User-Agent. --agent
-  --timeout TIMEOUT  Set timeout. Default: 7s. --timeout [time]
+  -h, --help   show this help message and exit
+  --url URL    Input url. --url https://lactea.kr
+  --agent      Generating random User-Agent. --agent
+  --file FILE  Enter your file name. --file ips.txt
 ```
 
 
