@@ -284,29 +284,50 @@ def banner():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "HTTP request Smuggler tools")
     
-    parser.add_argument("--url", required=True, help="Input url. --url https://lactea.kr")
+    parser.add_argument("--url", required=False, help="Input url. --url https://lactea.kr")
     parser.add_argument("--agent", required=False, action="store_true", help="Generating random User-Agent. --agent")
+    parser.add_argument("--file", required=False, help="Enter your file name. --file ips.txt")
     # parser.add_argument("--timeout", required=False, default=7, type=int, help="Set timeout. Default: 5s. --timeout [time]")
 
     args = parser.parse_args()
     
     banner()
     
+    # Setting
     if args.url == "" or args.url == None:
-        print("[!] Input URL.")
-        exit()
-        
+        if args.file == "" or args.file == None:
+            print("[!] Input URL.")
+            exit()
     if args.agent == True:
         args.agent = generateUserAgent()
     else:
         args.agent = "Smuggler test"
     
-    try:
-        r = requests.get(args.url, headers={"User-agent" : args.agent})
-    except requests.exceptions.MissingSchema as e:
-        exit("[!] No schema. Input url including http:// or https://.")
-    tester = checkServer(args)
+    url = []
+    if args.file:
+        try:
+            f = open(args.file, "r")
+        except IOError as e:
+            print(f"{bcolors.FAIL}[!] No such file {args.file}.{bcolors.ENDC}")
+            exit()
+        
+        while True:
+            line = f.readline()
+            if not line: break
+            if len(line) == 0: continue
+            url.append(line.replace("\n", ""))
+    else:
+        url.append(args.url)
     
-    print("[*] Sending to {}".format(args.url))
     
-    tester.start(args.url, r)
+    for u in url:
+        try:
+            r = requests.get(u, headers={"User-agent" : args.agent})
+        except requests.exceptions.MissingSchema as e:
+            print(f"{bcolors.FAIL}[!] No schema. Input url including http:// or https://.{bcolors.ENDC}")
+            exit()
+        tester = checkServer(args)
+        
+        print(f"\n\n[*] Sending to {bcolors.WARNING}{u}{bcolors.ENDC}")
+        
+        tester.start(u, r)

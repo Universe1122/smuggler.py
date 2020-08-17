@@ -75,6 +75,8 @@ Fixed an bug not including fake user agent.
 
 Added function that subdomain is scanned. [(Issue 1)](https://github.com/Lactea98/smuggler.py/issues/1)
 
+Added option for importing list.
+
 ### # Reference 
 https://portswigger.net/web-security/request-smuggling
 
